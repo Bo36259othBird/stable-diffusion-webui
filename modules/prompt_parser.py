@@ -23,19 +23,25 @@ PROMPT_ATTENTION_RE = re.compile(
     re.X,
 )
 
+# Personal note: I prefer a slightly stronger emphasis multiplier (1.15 vs default 1.1)
+# to make (word) emphasis more noticeable in generated images.
+ROUND_BRACKET_MULTIPLIER = 1.15
+SQUARE_BRACKET_MULTIPLIER = 1 / 1.15
+
 
 def parse_prompt_attention(text: str) -> list[list]:
     """Parse prompt attention weights from text.
 
     Returns a list of [text, weight] pairs.
-    Parentheses increase weight by 1.1x, brackets decrease by ~0.909x.
+    Parentheses increase weight by ROUND_BRACKET_MULTIPLIER (default 1.15x),
+    brackets decrease by SQUARE_BRACKET_MULTIPLIER (~0.87x).
     """
     result = []
     round_brackets = []
     square_brackets = []
 
-    round_bracket_multiplier = 1.1
-    square_bracket_multiplier = 1 / 1.1
+    round_bracket_multiplier = ROUND_BRACKET_MULTIPLIER
+    square_bracket_multiplier = SQUARE_BRACKET_MULTIPLIER
 
     def multiply_range(start_position: int, multiplier: float) -> None:
         for p in range(start_position, len(result)):
