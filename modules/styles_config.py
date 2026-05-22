@@ -43,8 +43,13 @@ def apply_styles(prompt: str, negative_prompt: str, style_names: list, path: str
 
 
 def save_style(name: str, prompt: str, negative_prompt: str = "", path: str = DEFAULT_STYLES_FILE):
-    """Add or update a style and persist to disk."""
+    """Add or update a style and persist to disk.
+
+    Note: existing style with the same name will be overwritten without confirmation.
+    """
     db = get_style_database(path)
+    if name in db.styles:
+        print(f"[styles_config] Overwriting existing style: '{name}'")
     db.add_style(PromptStyle(name=name, prompt=prompt, negative_prompt=negative_prompt))
     db.save()
 
@@ -52,5 +57,8 @@ def save_style(name: str, prompt: str, negative_prompt: str = "", path: str = DE
 def delete_style(name: str, path: str = DEFAULT_STYLES_FILE):
     """Remove a style by name and persist to disk."""
     db = get_style_database(path)
+    if name not in db.styles:
+        print(f"[styles_config] Warning: tried to delete non-existent style: '{name}'")
+        return
     db.delete_style(name)
     db.save()
