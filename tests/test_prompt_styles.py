@@ -17,6 +17,10 @@ class TestMergePrompts:
     def test_empty_style(self):
         assert merge_prompts("", "my prompt") == "my prompt"
 
+    def test_both_empty(self):
+        # edge case: both style and prompt are empty strings
+        assert merge_prompts("", "") == ""
+
 
 class TestApplyStylesToPrompt:
     def test_multiple_styles_applied(self):
@@ -80,4 +84,5 @@ class TestStyleDatabase:
     def test_delete_style(self):
         db = self._make_db([("cinematic", "cinematic", "")])
         db.delete_style("cinematic")
+        # verify the style is actually removed from the dict, not just falsy
         assert "cinematic" not in db.styles
