@@ -62,6 +62,20 @@ class TestParsePromptAttention:
         assert len(result) == 1
         assert result[0][0] == "hello world"
 
+    def test_explicit_weight_zero(self):
+        # Edge case: weight of 0.0 should be preserved (effectively disables the token)
+        result = parse_prompt_attention("(a cat:0.0)")
+        assert len(result) == 1
+        assert result[0][0] == "a cat"
+        assert abs(result[0][1] - 0.0) < 1e-6
+
+    def test_explicit_weight_very_large(self):
+        # Edge case: very large weights should be accepted as-is
+        result = parse_prompt_attention("(a cat:2.5)")
+        assert len(result) == 1
+        assert result[0][0] == "a cat"
+        assert abs(result[0][1] - 2.5) < 1e-6
+
 
 class TestGetLearnedConditioningPromptSchedules:
     def test_single_prompt_schedule(self):
@@ -78,5 +92,5 @@ class TestGetLearnedConditioningPromptSchedules:
         assert schedules[1][0][0] == 30
 
     def test_empty_prompts_list(self):
-        schedules = get_learned_conditioning_prompt_schedules([], steps=10)
+        schedules = get_learned_conditioning_prompt_schedules([], steps=20)
         assert schedules == []
