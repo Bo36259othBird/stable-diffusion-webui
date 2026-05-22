@@ -42,11 +42,14 @@ class StyleDatabase:
                 )
 
     def save(self):
-        os.makedirs(os.path.dirname(self.path), exist_ok=True) if os.path.dirname(self.path) else None
+        # Ensure parent directory exists before writing; skip makedirs if path has no directory component
+        if os.path.dirname(self.path):
+            os.makedirs(os.path.dirname(self.path), exist_ok=True)
         with open(self.path, "w", newline="", encoding="utf-8-sig") as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=["name", "prompt", "negative_prompt"])
             writer.writeheader()
-            for style in self.styles.values():
+            # Sort styles alphabetically by name for easier manual editing of the CSV
+            for style in sorted(self.styles.values(), key=lambda s: s.name.lower()):
                 writer.writerow({"name": style.name, "prompt": style.prompt, "negative_prompt": style.negative_prompt})
 
     def apply_styles_to_prompt(self, prompt: str, style_names: list) -> str:
