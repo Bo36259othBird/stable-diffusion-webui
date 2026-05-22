@@ -33,6 +33,10 @@ def apply_styles(prompt: str, negative_prompt: str, style_names: list, path: str
     db = get_style_database(path)
     # Filter out style names that aren't in the database to avoid errors
     valid_style_names = [name for name in style_names if name in db.styles]
+    # Log skipped style names so I can catch typos in my styles.csv
+    skipped = [name for name in style_names if name not in db.styles]
+    if skipped:
+        print(f"[styles_config] Warning: skipped unknown style(s): {skipped}")
     styled_prompt = db.apply_styles_to_prompt(prompt, valid_style_names)
     styled_negative = db.apply_negative_styles_to_prompt(negative_prompt, valid_style_names)
     return styled_prompt, styled_negative
