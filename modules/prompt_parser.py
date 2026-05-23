@@ -35,6 +35,8 @@ def parse_prompt_attention(text: str) -> list[list]:
     Returns a list of [text, weight] pairs.
     Parentheses increase weight by ROUND_BRACKET_MULTIPLIER (default 1.15x),
     brackets decrease by SQUARE_BRACKET_MULTIPLIER (~0.87x).
+
+    Escaped characters (e.g. \\( or \\[) are treated as literal text with weight 1.0.
     """
     result = []
     round_brackets = []
@@ -52,6 +54,10 @@ def parse_prompt_attention(text: str) -> list[list]:
         weight = m.group(1)
 
         if token.startswith("\\\\"):
+            # Escaped backslash: emit a single backslash
+            result.append([token[1:], 1.0])
+        elif token.startswith("\\"):
+            # Escaped paren/bracket or lone backslash: treat as literal text
             result.append([token[1:], 1.0])
         elif token == "(":
             round_brackets.append(len(result))
@@ -93,11 +99,4 @@ def parse_prompt_attention(text: str) -> list[list]:
 
 
 def get_learned_conditioning_prompt_schedules(
-    prompts: list[str], steps: int
-) -> list[list]:
-    """Build per-step prompt schedules from a list of prompt strings."""
-    schedules = []
-    for prompt in prompts:
-        schedule = [[steps, parse_prompt_attention(prompt)]]
-        schedules.append(schedule)
-    return schedules
+    prompts: list[str], step
