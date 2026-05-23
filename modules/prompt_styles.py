@@ -70,3 +70,7 @@ class StyleDatabase:
     def get_style_names(self) -> list[str]:
         """Return a sorted list of all style names. Handy for populating UI dropdowns."""
         return sorted(self.styles.keys(), key=str.lower)
+
+    def get_style(self, name: str) -> PromptStyle | None:
+        """Return a single style by name, or None if it doesn't exist."""
+        return self.styles.get(name)
