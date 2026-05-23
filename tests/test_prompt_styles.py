@@ -21,6 +21,11 @@ class TestMergePrompts:
         # edge case: both style and prompt are empty strings
         assert merge_prompts("", "") == ""
 
+    def test_multiple_placeholders(self):
+        # only the first {prompt} should matter; verifying no crash with multiple
+        result = merge_prompts("{prompt} and {prompt}", "cats")
+        assert "cats" in result
+
 
 class TestApplyStylesToPrompt:
     def test_multiple_styles_applied(self):
@@ -82,7 +87,14 @@ class TestStyleDatabase:
             os.unlink(path)
 
     def test_delete_style(self):
-        db = self._make_db([("cinematic", "cinematic", "")])
-        db.delete_style("cinematic")
-        # verify the style is actually removed from the dict, not just falsy
-        assert "cinematic" not in db.styles
+        # personal note: verifying that deleting a style actually removes it from the dict
+        with tempfile.NamedTemporaryFile(suffix=".csv", delete=False) as f:
+            path = f.name
+        try:
+            db = StyleDatabase(path)
+            db.add_style(PromptStyle("to_delete", "some prompt", ""))
+            assert "to_delete" in db.styles
+            db.delete_style("to_delete")
+            assert "to_delete" not in db.styles
+        finally:
+            os.unlink(path)
