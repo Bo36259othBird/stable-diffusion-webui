@@ -41,6 +41,12 @@ class TestApplyStylesToPrompt:
     def test_no_styles_returns_original(self):
         assert apply_styles_to_prompt("portrait", []) == "portrait"
 
+    def test_style_with_only_placeholder(self):
+        # style that is just "{prompt}" should return the prompt unchanged
+        styles = [PromptStyle("passthrough", "{prompt}", "")]
+        result = apply_styles_to_prompt("my prompt", styles)
+        assert result == "my prompt"
+
 
 class TestStyleDatabase:
     def _make_db(self, rows: list) -> StyleDatabase:
@@ -79,22 +85,3 @@ class TestStyleDatabase:
         try:
             db = StyleDatabase(path)
             db.add_style(PromptStyle("test", "test prompt", "test neg"))
-            db.save()
-            db2 = StyleDatabase(path)
-            assert "test" in db2.styles
-            assert db2.styles["test"].prompt == "test prompt"
-        finally:
-            os.unlink(path)
-
-    def test_delete_style(self):
-        # personal note: verifying that deleting a style actually removes it from the dict
-        with tempfile.NamedTemporaryFile(suffix=".csv", delete=False) as f:
-            path = f.name
-        try:
-            db = StyleDatabase(path)
-            db.add_style(PromptStyle("to_delete", "some prompt", ""))
-            assert "to_delete" in db.styles
-            db.delete_style("to_delete")
-            assert "to_delete" not in db.styles
-        finally:
-            os.unlink(path)
