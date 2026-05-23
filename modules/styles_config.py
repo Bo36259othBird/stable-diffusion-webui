@@ -52,6 +52,10 @@ def save_style(name: str, prompt: str, negative_prompt: str = "", path: str = DE
         print(f"[styles_config] Overwriting existing style: '{name}'")
     db.add_style(PromptStyle(name=name, prompt=prompt, negative_prompt=negative_prompt))
     db.save()
+    # Reload the in-memory db so callers immediately see the updated style
+    # without needing to manually call reload_styles(). Noticed this was a
+    # footgun when testing new styles interactively.
+    _db = db
 
 
 def delete_style(name: str, path: str = DEFAULT_STYLES_FILE):
